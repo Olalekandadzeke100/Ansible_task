@@ -45,7 +45,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/new_ansible_key.pem
-          chmod 600 ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/new_ansible_key.pem
 
       - name: (Optional) Test Flask App Code
         run: |
