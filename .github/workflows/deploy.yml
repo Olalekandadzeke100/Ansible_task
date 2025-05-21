@@ -1,0 +1,58 @@
+name: Build and Deploy Flask App
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to DockerHub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/ansibleapp:latest ./app
+
+      - name: Push image to DockerHub
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/ansibleapp:latest
+
+  deploy:
+    name: Deploy to Server
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Ansible
+        run: |
+          pip install ansible
+          ansible-galaxy collection install community.docker
+
+      - name: Add SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: (Optional) Test Flask App Code
+        run: |
+          python3 -m py_compile app/app.py
+          echo "Basic syntax check passed!"
+
+      - name: Run Ansible Playbook
+        run: |
+          ansible-playbook -i inventory playbook.yml
+
