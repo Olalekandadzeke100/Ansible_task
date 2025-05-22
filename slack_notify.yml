@@ -1,0 +1,20 @@
+---
+- name: Notify Slack via Ansible
+  hosts: localhost
+  vars:
+    slack_webhook: "https://hooks.slack.com/services/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"
+    slack_message: "🚀 Ansible deployment completed successfully on {{ inventory_hostname }} at {{ ansible_date_time.date }} {{ ansible_date_time.time }}"
+
+  tasks:
+    - name: Send Slack notification
+      uri:
+        url: "{{ slack_webhook }}"
+        method: POST
+        headers:
+          Content-Type: "application/json"
+        body: >
+          {
+            "text": "{{ slack_message }}"
+          }
+        body_format: json
+  

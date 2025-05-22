@@ -1,0 +1,17 @@
+name: Notify Slack on push to main
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send Slack notification
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data '{"text":"🚀 Code was pushed to *main* branch!"}' \
+            https://hooks.slack.com/services/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
